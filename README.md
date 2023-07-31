@@ -16,3 +16,8 @@ Target identification
 Model fitting
 Hosting with web API
 Model serving
+
+## Data Source: Weather API
+
+https://api.weather.gov
+https://www.weather.gov/documentation/services-web-api
