@@ -1,0 +1,24 @@
+import json
+import requests
+import boto3
+import logging
+
+print("Loading function")
+
+
+def lambda_handler(event, context):
+    # print("Received event: " + json.dumps(event, indent=2))
+
+    res = requests.get("https://api.weather.gov/zones/Feature/OHZ055/forecast")
+
+    if res.status_code == 200:
+        logging.info("***** Response code: 200 *****")
+    else:
+        logging.error("Error in API response.")
+
+    s3 = boto3.resource("s3")
+    object = s3.Object("cw-weather-data", "test.json")
+    object.put(Body=bytes(json.dumps(res.json()).encode("UTF-8")))
+    print("object put to cw-weather-data")
+
+    return  # Echo back the first key value
