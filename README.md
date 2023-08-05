@@ -74,3 +74,16 @@ https://www.eia.gov/opendata/browser/electricity
 
 + Data Scientist
 + ML Ops Engineer
+
+# Data Model
+
+**humidity_data**
+
+| column/attribute | data type | description | units |
+|------------------|-----------|-------------|-------|
+| relative_humidity | decimal (4,2) | The relative humidity. | |
+| wind_speed | <need this> | Wind speed. | |
+| elevation | add this | The elevation of the station taking the measurement. | |
+| precipitation_last_hr | integer | The amount of precipitation in the last hour from the measurement time. | |
+| temperature | decimal (5,2) | The temperature of the air. | |
+| cloud_layers | char(3) | The type of cloud layers. | |
