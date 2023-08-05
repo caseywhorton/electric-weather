@@ -81,6 +81,8 @@ https://www.eia.gov/opendata/browser/electricity
 
 | column/attribute | data type | description | units |
 |------------------|-----------|-------------|-------|
+| measurement_dte | date | The date of the measurement. | None |
+| measurement_stp | timestamp | The time of the measurement. | None |
 | relative_humidity | decimal (4,2) | The relative humidity. | |
 | wind_speed | <need this> | Wind speed. | |
 | elevation | add this | The elevation of the station taking the measurement. | |
