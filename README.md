@@ -89,3 +89,14 @@ https://www.eia.gov/opendata/browser/electricity
 | precipitation_last_hr | integer | The amount of precipitation in the last hour from the measurement time. | |
 | temperature | decimal (5,2) | The temperature of the air. | |
 | cloud_layers | char(3) | The type of cloud layers. | |
+
+# Model Training
+
+JSON Document Format:
+
+{"start":<timestamp>, "relative_humidity": [...]}
+{"start":<timestamp>, "wind_speed": [...]}
+
+# Deployment
+
+# CI/CD
