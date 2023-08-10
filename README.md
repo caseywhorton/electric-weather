@@ -58,6 +58,9 @@ https://www.eia.gov/opendata/browser/electricity
     - observations
     - forecasts
 - cw-sagemaker-domain-1
+    - deep_ar
+        - train
+        - test
 
 ## EventBridge
 
