@@ -66,13 +66,21 @@ https://www.eia.gov/opendata/browser/electricity
 
 ## SNS Subscriptions
 
+Email subscription for budget.
+
+
 ## CloudWatch Alarms
+
+Lambda function alarm for function error.
 
 ## Elastic Container Registry (ECR)
 
 ## Sagemaker
 
 ### Domain
+
+A single domain with Sagemaker Studio.
+
 ### User Profiles
 
 + Data Scientist
@@ -95,11 +103,44 @@ https://www.eia.gov/opendata/browser/electricity
 
 # Model Training
 
-JSON Document Format:
+JSON Document Format for Deep AR:
 
 {"start":<timestamp>, "relative_humidity": [...]}
 {"start":<timestamp>, "wind_speed": [...]}
 
+
+
 # Deployment
 
-# CI/CD
+For deployment, I am working with two options to explore how each operate:
+
++ Batch Transform
++ Real Time Endpoint
+
+## Batch Transform
+
+For this deployment, an inference pipeline will be created to run 24 hours of predictions from a trained model.
+
+### CI/CD
+
+-
+- Add a feature to the model
+    - Retrain the model and use new model artifact
+
+## Real Time Endpoint
+
+For this deployment, an endpoint will be made prevalent and available for a 24 hour period for making predictions. Each prediction will predict the next hour's target value.
+
+- Import Docker Image
+- Create Model Endpoint Configuration
+- Create Model Endpoint ([Single Model)](https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints-deployment.html))
+    - Capture Data (input)
+- Run inference on 1 hour basis
+- Capture Data (output)
+- Delete Model Endpoint
+
+### CI/CD
+
+- Change the S3 location of saved data
+- Add a feature to the input dataset
+    - Retrain the model and switch to new model artifact
