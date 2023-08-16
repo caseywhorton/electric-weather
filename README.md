@@ -126,6 +126,7 @@ For this deployment, an inference pipeline will be created to run 24 hours of pr
 - change
 - Add a feature to the model
     - Retrain the model and use new model artifact
+    -
 
 ## Real Time Endpoint
 
