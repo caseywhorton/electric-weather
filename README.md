@@ -61,6 +61,11 @@ https://www.eia.gov/opendata/browser/electricity
     - deep_ar
         - train
         - test
+        - output
+            - model
+                - output
+                    - model artifact
+                    - predictions
 
 ## EventBridge
 
