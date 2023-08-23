@@ -88,6 +88,12 @@ A single domain with Sagemaker Studio.
 
 # Data Model
 
+**predictions**
+| column/attribute | data type | description | units |
+|------------------|-----------|-------------|-------|
+| id | hash | unique id for predictions | None |
+
+
 **humidity_data**
 
 | column/attribute | data type | description | units |
