@@ -39,7 +39,7 @@ https://www.eia.gov/opendata/browser/electricity
 
 + AWS Secrets Manager
     + Maintains the API key secret
-    + Get's rotated by AWS Lambda
+    + Gets rotated by AWS Lambda
 + AWS Lambda
     + Executes python script to get data from open APIs
     + Saves artifacts
@@ -56,7 +56,7 @@ https://www.eia.gov/opendata/browser/electricity
 
 - cw-weather-data
     - observations
-    - forecasts
+        - <zone>_<date>.json
 - cw-sagemaker-domain-1
     - deep_ar
         - train
