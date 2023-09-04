@@ -35,6 +35,14 @@ https://www.eia.gov/opendata/browser/electricity
 - Current Measurements: https://api.weather.gov/zones/forecast/OHZ055/observations
 - Electricity Price: "https://api.eia.gov/v2/electricity/retail-sales/data?api_key=<api_key>&frequency=monthly&data[0]=customers&data[1]=price&data[2]=revenue&data[3]=sales&facets[stateid][]=OH&start=2023-01&end=2023-05&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000"
 
+# ETL
+
+1. Get data from API (source data), save to S3 (lambda)
+2. Preprocess files on S3, save to `raw` data folder on S3 (lambda)
+3. Preprocess raw data on S3 and split into train and test data
+4.
+5.
+
 # Services
 
 + AWS Secrets Manager
@@ -59,6 +67,8 @@ https://www.eia.gov/opendata/browser/electricity
         - <zone>_<date>.json
 - cw-sagemaker-domain-1
     - deep_ar
+        - data
+            - raw
         - train
         - test
         - output
