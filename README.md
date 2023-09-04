@@ -88,6 +88,18 @@ Email subscription for budget.
 
 Lambda function alarm for function error.
 
+## Lambda Function
+
++ Need to add a Layer for the pandas function.
++ Each function is triggered by the previous function and writes logs to cloudwatch.
+
+get_weather_data -> preprocess_weather_data -> train_test_split_weather_data
+
+**get_weather_data** : Gets the data from the API request.
+**preprocess_weather_data** : Preprocessing the API request JSON data into just feature data.
+**train_test_split_weather_data** : Further preprocesses and splits the preprocessed weather data into training and test data.
+
+
 ## Elastic Container Registry (ECR)
 
 ## Sagemaker

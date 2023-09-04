@@ -1,7 +1,6 @@
 import json
 import urllib.parse
 import boto3
-import datetime
 import pandas as pd
 from utils.preprocessing import *
 
@@ -17,21 +16,7 @@ def lambda_handler(event, context):
         event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
     )
 
-    # get the data from s3
-    # get the file that triggered the lambda
-    # s3 = boto3.client("s3")
-    # fc = s3.get_object(Bucket=bucket, Key=key)
-    # file_content = fc["Body"]
-    # raw_json = json.load(file_content)
-
-    # print("Received event: " + json.dumps(event, indent=2))
-
-    features = [
-        # "properties.windSpeed.value",
-        "properties.temperature.value",
-        "properties.relativeHumidity.value"
-        #'properties.cloudLayers'
-    ]
+    features = ["properties.temperature.value", "properties.relativeHumidity.value"]
 
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
@@ -41,8 +26,7 @@ def lambda_handler(event, context):
         df = df[df["properties.station"] == "https://api.weather.gov/stations/KCVG"]
         df.index = df["properties.timestamp"]
         df.sort_index(inplace=True)
-        df = df[["properties.timestamp"] + features]
-        df = df.drop_duplicates()
+        df = df[["properties.timestamp"] + features].drop_duplicates()
 
         preprocessed_df = preprocessDataFrame(df)
         start = getStart(preprocessed_df)
@@ -60,11 +44,6 @@ def lambda_handler(event, context):
                 )
             )
 
-        # print(bucket)
-        # print(key)
-        # print("CONTENT TYPE: " + response['ContentType'])
-        print(mylist)
-
         bucket = "cw-sagemaker-domain-1"
         key_prefix = "deep_ar/data/raw/"
         file_name = (
@@ -72,7 +51,7 @@ def lambda_handler(event, context):
             + key[key.find("/") + 1 : key.find(".json")]
             + "_preprocessed.json"
         )
-        print(file_name)
+        print(f"Writing to {bucket}/{file_name}")
 
         response = s3.put_object(
             Body=json.dumps(mylist), Bucket="cw-sagemaker-domain-1", Key=file_name
