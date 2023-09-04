@@ -3,7 +3,8 @@ import numpy as np
 import json
 import requests
 import boto3
-from sklearn.preprocessing import StandardScaler
+
+# from sklearn.preprocessing import StandardScaler
 import datetime
 from typing import Dict, List
 
