@@ -95,7 +95,7 @@ def lambda_handler(event, context):
 
     copy_to_s3(
         "/tmp/" + FILE_TRAIN,
-        "s3://cw-sagemaker-domain-2/"
+        "s3://{}/"
         + key_prefix_train
         + "/"
         + key[key.find("raw/") + len("raw/") : key.find("_preprocessed")]
@@ -104,7 +104,7 @@ def lambda_handler(event, context):
     )
     copy_to_s3(
         "/tmp/" + FILE_TEST,
-        "s3://cw-sagemaker-domain-2/"
+        "s3://{}/"
         + key_prefix_test
         + "/"
         + key[key.find("raw/") + len("raw/") : key.find("_preprocessed")]
