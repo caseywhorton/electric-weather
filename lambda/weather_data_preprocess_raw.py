@@ -44,7 +44,7 @@ def lambda_handler(event, context):
                 )
             )
 
-        bucket = "cw-sagemaker-domain-1"
+        bucket = "{}"
         key_prefix = "deep_ar/data/raw/"
         file_name = (
             key_prefix
@@ -54,7 +54,7 @@ def lambda_handler(event, context):
         print(f"Writing to {bucket}/{file_name}")
 
         response = s3.put_object(
-            Body=json.dumps(mylist), Bucket="cw-sagemaker-domain-1", Key=file_name
+            Body=json.dumps(mylist), Bucket="{}", Key=file_name
         )
 
         return response  # ['ContentType']
