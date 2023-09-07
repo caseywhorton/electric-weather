@@ -141,7 +141,7 @@ JSON Document Format for Deep AR:
 {"start":<timestamp>, "relative_humidity": [...]}
 {"start":<timestamp>, "wind_speed": [...]}
 
-
+In order to train the deep AR model, we need at least 300 observations. A single day of observations from a single station has about 72 observations. So, we need several days of observations.
 
 # Deployment
 
