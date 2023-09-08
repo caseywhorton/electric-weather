@@ -69,13 +69,16 @@ https://www.eia.gov/opendata/browser/electricity
     - deep_ar
         - data
             - raw
-        - train
-        - test
         - output
             - model
                 - output
-                    - model artifact
+                    - <model artifact>
                     - predictions
+- cw-sagemaker-domain-2
+    - deep_ar
+        - data
+            - train
+            - test
 
 ## EventBridge
 
@@ -97,7 +100,9 @@ get_weather_data -> preprocess_weather_data -> train_test_split_weather_data
 
 **get_weather_data** : Gets the data from the API request.
 **preprocess_weather_data** : Preprocessing the API request JSON data into just feature data.
-**train_test_split_weather_data** : Further preprocesses and splits the preprocessed weather data into training and test data.
+**train_test_split_weather_data** : Gathers preprocessed data and creates a training and test dataset.
+Each training set needs >= 300 observations
+Each observation is roughtly 1 hour, so we keep 24 observations as a hold-out set for testing.
 
 
 ## Elastic Container Registry (ECR)
