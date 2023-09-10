@@ -3,116 +3,128 @@ import pandas as pd
 import boto3
 import urllib.parse
 import datetime
+from utils.train_test_split import *
+from datetime import datetime, timezone, timedelta, date
 
 s3 = boto3.client("s3")
-
-
-def write_dicts_to_file(path, data):
-    with open(path, "wb") as fp:
-        for d in data:
-            fp.write(json.dumps(d).encode("utf-8"))
-            fp.write("\n".encode("utf-8"))
-
-
-def series_to_obj(ts, cat=None):
-    obj = {"start": str(ts.index[0]), "target": list(ts)}
-    if cat is not None:
-        obj["cat"] = cat
-    return obj
-
-
-def series_to_jsonline(ts, cat=None):
-    return json.dumps(series_to_obj(ts, cat))
-
-
-def dict_to_series(time_dict: dict) -> pd.Series:
-    """Translates a dictionary to a time series using a pandas series data type."""
-    time_index = pd.date_range(
-        start=time_dict["start"], periods=len(time_dict["target"]), freq="H"
-    )
-    return pd.Series(data=time_dict["target"], index=time_index)
-
-
-def copy_to_s3(local_file, s3_path, override=False):
-    s3 = boto3.resource("s3")
-
-    assert s3_path.startswith("s3://")
-    split = s3_path.split("/")
-    bucket = split[2]
-    path = "/".join(split[3:])
-    buk = s3.Bucket(bucket)
-
-    if len(list(buk.objects.filter(Prefix=path))) > 0:
-        if not override:
-            print(
-                "File s3://{}/{} already exists.\nSet override to upload anyway.\n".format(
-                    bucket, s3_path
-                )
-            )
-            return
-        else:
-            print("Overwriting existing file")
-    with open(local_file, "rb") as data:
-        print("Uploading file to {}".format(s3_path))
-        buk.put_object(Key=path, Body=data)
 
 
 def lambda_handler(event, context):
     # Get the object from the event and show its content type
     s3 = boto3.client("s3")
 
-    bucket = event["Records"][0]["s3"]["bucket"]["name"]
-    key = urllib.parse.unquote_plus(
-        event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
-    )
-    fc = s3.get_object(Bucket=bucket, Key=key)
-    file_content = fc["Body"]
-    raw_json = json.load(file_content)
+    bucket = "cw-sagemaker-domain-1"
+    prefix = "deep_ar/data/raw"
 
+    today = datetime.now(timezone.utc)
+    lag_365 = datetime.now(timezone.utc) + timedelta(days=-365)
+
+    objects = s3.list_objects(Bucket=bucket, Prefix=prefix)
+
+    df_list = []
+    for o in objects["Contents"]:
+        if o["LastModified"] <= today and o["LastModified"] >= lag_365:
+            print(o["Key"])
+            obj = s3.get_object(Bucket=bucket, Key=o["Key"])
+            df_list.append(pd.read_csv(obj["Body"]))
+
+    # drop the duplicates from the dataframe
+    preprocessed_df = pd.concat(df_list).drop_duplicates().reset_index()
+
+    # process the features in the columns of the dataframe
+    start = getStart(preprocessed_df)
+    start_str = getStartString(preprocessed_df)
+    features = ["properties.relativeHumidity.value", "properties.temperature.value"]
+
+    # preprocess the feature data
+    mylist = list()
+
+    for feature in features:
+        mylist.append(
+            featureDict(
+                start_str,
+                columnNameReformat(feature, "properties.relativeHumidity.value"),
+                # feature,
+                preprocessQuant(preprocessed_df[feature]),
+            )
+        )
+
+    # create the individual time series for each feature
     time_series = []
-    for i in raw_json:
+    for i in mylist:
         time_series.append(dict_to_series(i))
+
+    # Create the feature set list
+
+    feature_dict = {"features": features}
+    encoding = "utf-8"
+    file_name = "feature_names.json"
+    with open("/tmp/" + file_name, "w") as f:
+        json.dump(feature_dict, f)
+
+    copy_to_s3(
+        "/tmp/" + file_name,
+        "s3://cw-sagemaker-domain-2/"
+        + "deep_ar/data/metadata/"
+        + "OHZ055_"
+        + date.today().strftime("%Y-%m-%d")
+        + "_feature_names.json",
+        override=True,
+    )
+
+    # Create test data
+
+    encoding = "utf-8"
+    file_name = "test.json"
+    i = 0
+    with open("/tmp/" + file_name, "wb") as f:
+        for ts in time_series:
+            f.write(
+                series_to_jsonline(ts, feature_name=list(mylist[i].keys())[1]).encode(
+                    encoding
+                )
+            )
+            # print(series_to_jsonline(ts,list(mylist[i].keys())[1]))
+            f.write("\n".encode(encoding))
+            i += 1
+
+    copy_to_s3(
+        "/tmp/" + file_name,
+        "s3://cw-sagemaker-domain-2/"
+        + "deep_ar/data/test/"
+        + "OHZ055_"
+        + date.today().strftime("%Y-%m-%d")
+        + "_test.json",
+        override=True,
+    )
 
     time_series_training = []
     for ts in time_series:
         time_series_training.append(ts[:-24])
 
     encoding = "utf-8"
-    FILE_TRAIN = "train.json"
-    FILE_TEST = "test.json"
-    with open("/tmp/" + FILE_TRAIN, "wb") as f:
-        for ts in time_series_training:
-            f.write(series_to_jsonline(ts).encode(encoding))
-            f.write("\n".encode(encoding))
-
-    with open("/tmp/" + FILE_TEST, "wb") as f:
+    file_name = "train.json"
+    i = 0
+    with open("/tmp/" + file_name, "wb") as f:
         for ts in time_series:
-            f.write(series_to_jsonline(ts).encode(encoding))
+            f.write(
+                series_to_jsonline(ts, feature_name=list(mylist[i].keys())[1]).encode(
+                    encoding
+                )
+            )
+            # print(series_to_jsonline(ts,list(mylist[i].keys())[1]))
             f.write("\n".encode(encoding))
-
-    key_prefix_train = "deep_ar/data/train"
-    key_prefix_test = "deep_ar/data/test"
+            i += 1
 
     copy_to_s3(
-        "/tmp/" + FILE_TRAIN,
-        "s3://{}/"
-        + key_prefix_train
-        + "/"
-        + key[key.find("raw/") + len("raw/") : key.find("_preprocessed")]
+        "/tmp/" + file_name,
+        "s3://cw-sagemaker-domain-2/"
+        + "deep_ar/data/train/"
+        + "OHZ055_"
+        + date.today().strftime("%Y-%m-%d")
         + "_train.json",
         override=True,
     )
-    copy_to_s3(
-        "/tmp/" + FILE_TEST,
-        "s3://{}/"
-        + key_prefix_test
-        + "/"
-        + key[key.find("raw/") + len("raw/") : key.find("_preprocessed")]
-        + "_test.json",
-        override=True,
-    )
 
-    print(bucket)
-    print(key)
     # TODO implement
     return {"statusCode": 200, "body": json.dumps("Hello from Lambda!")}
