@@ -9,6 +9,10 @@ Flask 2.2.4
 Werkzeug 2.2.3
 ```
 
+## Docker
+
+`~ % docker build -t cw-sagemaker -f ./ml_preprocessing_dockerfile . --platform=linux/amd64`
+
 ## Project Planning
 
 + Identify data sources
