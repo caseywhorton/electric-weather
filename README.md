@@ -9,10 +9,6 @@ Flask 2.2.4
 Werkzeug 2.2.3
 ```
 
-## Docker
-
-`~ % docker build -t <> -f ./ml_preprocessing_dockerfile . --platform=linux/amd64`
-
 ## Project Planning
 
 + Identify data sources
@@ -24,17 +20,18 @@ Werkzeug 2.2.3
 + Hosting with web API
 + Model serving
 
-## Data Source: Weather API
+# Data Sources
+
+**Data Source: Weather API**
 
 https://api.weather.gov
 https://www.weather.gov/documentation/services-web-api
 
-## Data Source: Electricity
+**Data Source: Electricity**
 
 https://www.eia.gov/opendata/browser/electricity
 
-## CURL requests
-
+_CURL requests_
 - Forecast: https://api.weather.gov/zones/Feature/OHZ055/forecast
 - Current Measurements: https://api.weather.gov/zones/forecast/OHZ055/observations
 - Electricity Price: "https://api.eia.gov/v2/electricity/retail-sales/data?api_key=<api_key>&frequency=monthly&data[0]=customers&data[1]=price&data[2]=revenue&data[3]=sales&facets[stateid][]=OH&start=2023-01&end=2023-05&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000"
@@ -44,10 +41,9 @@ https://www.eia.gov/opendata/browser/electricity
 1. Get data from API (source data), save to S3 (lambda)
 2. Preprocess files on S3, save to `raw` data folder on S3 (lambda)
 3. Preprocess raw data on S3 and split into train and test data
-4.
-5.
 
-# Services
+# AWS Services and Tools
+
 
 + AWS Secrets Manager
     + Maintains the API key secret
@@ -64,7 +60,7 @@ https://www.eia.gov/opendata/browser/electricity
 + AWS CI/CD tools
     + Code pipeline
 
-## S3 directories
+## AWS S3
 
 - cw-weather-data
     - observations
@@ -84,7 +80,7 @@ https://www.eia.gov/opendata/browser/electricity
             - train
             - test
 
-## EventBridge
+
 
 ## SNS Subscriptions
 
@@ -95,7 +91,7 @@ Email subscription for budget.
 
 Lambda function alarm for function error.
 
-## Lambda Function
+## AWS Lambda Functions
 
 + Need to add a Layer for the pandas function.
 + Each function is triggered by the previous function and writes logs to cloudwatch.
@@ -108,17 +104,22 @@ get_weather_data -> preprocess_weather_data -> train_test_split_weather_data
 Each training set needs >= 300 observations
 Each observation is roughtly 1 hour, so we keep 24 observations as a hold-out set for testing.
 
+### AWS EventBridge
 
 ## Elastic Container Registry (ECR)
 
-## Sagemaker
+**Docker**
 
-### Domain
+`~ % docker build -t <> -f ./ml_preprocessing_dockerfile . --platform=linux/amd64`
+
+## Sagemaker
 
 A single domain with Sagemaker Studio.
 
-### User Profiles
 
+## AWS Identity and Access Manager
+
+**User Profiles**
 + Data Scientist
 + ML Ops Engineer
 
@@ -143,7 +144,13 @@ A single domain with Sagemaker Studio.
 | temperature | decimal (5,2) | The temperature of the air. | |
 | cloud_layers | char(3) | The type of cloud layers. | |
 
-# Model Training
+# Model Training Pipeline
+
+## Preprocessing Steps
+
+Train/Test split.
+
+## Model Training Step
 
 JSON Document Format for Deep AR:
 
@@ -152,29 +159,22 @@ JSON Document Format for Deep AR:
 
 In order to train the deep AR model, we need at least 300 observations. A single day of observations from a single station has about 72 observations. So, we need several days of observations.
 
-# Deployment
+## Model Evaluation
 
-For deployment, I am working with two options to explore how each operate:
+### Batch Transform
 
-+ Batch Transform
-+ Real Time Endpoint
-
-## Batch Transform
-
-For this deployment, an inference pipeline will be created to run 24 hours of predictions from a trained model.
-
-### CI/CD
-
-- change
-- Add a feature to the model
-    - Retrain the model and use new model artifact
-    -
-
-### Model Evaluation
+### ScriptProcessor for Evaluation
 
 The documentatio on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
 
 $ RMSE = \sqrt{\frac{1}{nT}*\sum_{i,t}(\hat{y}_{i,t}-y_{i,t})^2} $
+
+# CI/CD
+
+## Model Train
+
+## Model Deploy
+
 
 ## Real Time Endpoint
 
@@ -187,9 +187,3 @@ For this deployment, an endpoint will be made prevalent and available for a 24 h
 - Run inference on 1 hour basis
 - Capture Data (output)
 - Delete Model Endpoint
-
-### CI/CD
-
-- Change the S3 location of saved data
-- Add a feature to the input dataset
-    - Retrain the model and switch to new model artifact
