@@ -170,6 +170,12 @@ For this deployment, an inference pipeline will be created to run 24 hours of pr
     - Retrain the model and use new model artifact
     -
 
+### Model Evaluation
+
+The documentatio on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
+
+$ RMSE = \sqrt{\frac{1}{nT}*\sum_{i,t}(\hat{y}_{i,t}-y_{i,t})^2} $
+
 ## Real Time Endpoint
 
 For this deployment, an endpoint will be made prevalent and available for a 24 hour period for making predictions. Each prediction will predict the next hour's target value.
