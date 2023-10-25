@@ -1,7 +1,5 @@
 # heat-warning
 
-Create an isolated environment
-
 Requirements
 ```
 Python 3.9.13
