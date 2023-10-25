@@ -22,6 +22,9 @@ Werkzeug 2.2.3
 
 # Data Sources
 
++ Weather Data
++ Electricity
+
 **Data Source: Weather API**
 
 https://api.weather.gov
@@ -103,8 +106,12 @@ get_weather_data -> preprocess_weather_data -> train_test_split_weather_data
 **train_test_split_weather_data** : Gathers preprocessed data and creates a training and test dataset.
 Each training set needs >= 300 observations
 Each observation is roughtly 1 hour, so we keep 24 observations as a hold-out set for testing.
+**weather_forecast_batch_transform** : Gets forecasts from the trained model.
 
 ### AWS EventBridge
+
++ Daily Event Trigger
++ Every 3 days Trigger
 
 ## Elastic Container Registry (ECR)
 
@@ -125,26 +132,13 @@ A single domain with Sagemaker Studio.
 
 # Data Model
 
-**predictions**
-| column/attribute | data type | description | units |
-|------------------|-----------|-------------|-------|
-| id | hash | unique id for predictions | None |
+# CI/CD
 
+https://github.com/caseywhorton/deep-ar-mlops-project
 
-**humidity_data**
+## Model Training Pipeline
 
-| column/attribute | data type | description | units |
-|------------------|-----------|-------------|-------|
-| measurement_dte | date | The date of the measurement. | None |
-| measurement_stp | timestamp | The time of the measurement. | None |
-| relative_humidity | decimal (4,2) | The relative humidity. | |
-| wind_speed | <need this> | Wind speed. | |
-| elevation | add this | The elevation of the station taking the measurement. | |
-| precipitation_last_hr | integer | The amount of precipitation in the last hour from the measurement time. | |
-| temperature | decimal (5,2) | The temperature of the air. | |
-| cloud_layers | char(3) | The type of cloud layers. | |
-
-# Model Training Pipeline
+https://github.com/caseywhorton/deep-ar-mlops-project
 
 ## Preprocessing Steps
 
@@ -161,29 +155,18 @@ In order to train the deep AR model, we need at least 300 observations. A single
 
 ## Model Evaluation
 
+$ RMSE = \sqrt{\frac{1}{nT}*\sum_{i,t}(\hat{y}_{i,t}-y_{i,t})^2} $
+
 ### Batch Transform
+
+
 
 ### ScriptProcessor for Evaluation
 
-The documentatio on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
+The documentation on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
 
-$ RMSE = \sqrt{\frac{1}{nT}*\sum_{i,t}(\hat{y}_{i,t}-y_{i,t})^2} $
 
-# CI/CD
-
-## Model Train
 
 ## Model Deploy
 
-
-## Real Time Endpoint
-
-For this deployment, an endpoint will be made prevalent and available for a 24 hour period for making predictions. Each prediction will predict the next hour's target value.
-
-- Import Docker Image
-- Create Model Endpoint Configuration
-- Create Model Endpoint ([Single Model)](https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints-deployment.html))
-    - Capture Data (input)
-- Run inference on 1 hour basis
-- Capture Data (output)
-- Delete Model Endpoint
+https://github.com/caseywhorton/deep-ar-mlops-project-deploy
