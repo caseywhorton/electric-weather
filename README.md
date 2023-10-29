@@ -1,36 +1,23 @@
-# heat-warning
+# electric-weather
 
-Requirements
-```
-Python 3.9.13
-Flask 2.2.4
-Werkzeug 2.2.3
-```
+<p align="center">
+  <img src="images/denver-saldanha-75jQCOTi_EQ-unsplash.jpg" width="450" height="200">
+</p>
+<p align = "center">
+Photo by <a href="https://unsplash.com/@densaldanha?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Denver Saldanha</a> on <a href="https://unsplash.com/photos/a-grassy-hill-with-power-lines-in-the-distance-75jQCOTi_EQ?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+</p>
 
-## Project Planning
+Greetings!
 
-+ Identify data sources
-+ Model data
-+ Environment Set up
-+ Data Preprocessing
-+ Target identification
-+ Model fitting
-+ Hosting with web API
-+ Model serving
 
 # Data Sources
 
 + Weather Data
+    + https://api.weather.gov
+    + https://www.weather.gov/documentation/services-web-api
 + Electricity
+    + https://www.eia.gov/opendata/browser/electricity
 
-**Data Source: Weather API**
-
-https://api.weather.gov
-https://www.weather.gov/documentation/services-web-api
-
-**Data Source: Electricity**
-
-https://www.eia.gov/opendata/browser/electricity
 
 _CURL requests_
 - Forecast: https://api.weather.gov/zones/Feature/OHZ055/forecast
@@ -40,33 +27,29 @@ _CURL requests_
 # ETL
 
 1. Get data from API (source data), save to S3 (lambda)
-2. Preprocess files on S3, save to `raw` data folder on S3 (lambda)
+2. Preprocess files on S3 into raw data
 3. Preprocess raw data on S3 and split into train and test data
 
 # AWS Services and Tools
 
-
-+ AWS Secrets Manager
-    + Maintains the API key secret
-    + Gets rotated by AWS Lambda
-+ AWS Lambda
-    + Executes python script to get data from open APIs
-    + Saves artifacts
-+ AWS S3 or AWS DynamoDB
-    + Storage for data
-+ AWS Sagemaker
-    + Studio
-    + Pipelines
++ AWS S3: Storage for data.
++ AWS SNS: Subscription services
++ AWS Cloudwatch: Watches for lambda function errors and communicates to user.
++ AWS Lambda: Executes python script to get data from open APIs and save to storage.
++ AWS EventBridge: Service to trigger AWS Lambda functions.
++ AWS Elastic Container Registry (ECR)
++ AWS Sagemaker: Pipelines for Machine Learning
++ AWS Identity and Access Manager (IAM)
++ AWS Code pipeline: CI/CD services
++ AWS Secrets Manager: Maintains the API key secret, gets rotated by AWS Lambda
 + AWS SAM
-+ AWS CI/CD tools
-    + Code pipeline
 
 ## AWS S3
 
-- cw-weather-data
+- (top directory)
     - observations
         - <zone>_<date>.json
-- cw-sagemaker-domain-1
+- (second bucket))
     - deep_ar
         - data
             - raw
@@ -75,20 +58,17 @@ _CURL requests_
                 - output
                     - <model artifact>
                     - predictions
-- cw-sagemaker-domain-2
+- (third bucket)
     - deep_ar
         - data
             - train
             - test
 
-
-
-## SNS Subscriptions
+## AWS SNS Subscriptions
 
 Email subscription for budget.
 
-
-## CloudWatch Alarms
+## AWS CloudWatch Alarms
 
 Lambda function alarm for function error.
 
@@ -111,38 +91,33 @@ Each observation is roughtly 1 hour, so we keep 24 observations as a hold-out se
 + Daily Event Trigger
 + Every 3 days Trigger
 
-## Elastic Container Registry (ECR)
+## AWS Elastic Container Registry (ECR)
 
 **Docker**
 
 `~ % docker build -t <> -f ./ml_preprocessing_dockerfile . --platform=linux/amd64`
 
-## Sagemaker
+## AWS Sagemaker
 
 A single domain with Sagemaker Studio.
 
-
-## AWS Identity and Access Manager
+## AWS Identity and Access Manager (IAM)
 
 **User Profiles**
 + Data Scientist
 + ML Ops Engineer
 
-# Data Model
+# AWS CodeBuild CI/CD
 
-# CI/CD
 
-https://github.com/caseywhorton/deep-ar-mlops-project
+## Continuous Integration and Development Pattern
 
-## Model Training Pipeline
+For CI/CD, I utilize a **Model Training Pipeline** and a **Model Deployment Pipeline**
 
-https://github.com/caseywhorton/deep-ar-mlops-project
+Model Training Pipeline: https://github.com/caseywhorton/deep-ar-mlops-project
 
-## Preprocessing Steps
 
-Train/Test split.
-
-## Model Training Step
+# Machine Learning
 
 JSON Document Format for Deep AR:
 
@@ -151,20 +126,15 @@ JSON Document Format for Deep AR:
 
 In order to train the deep AR model, we need at least 300 observations. A single day of observations from a single station has about 72 observations. So, we need several days of observations.
 
-## Model Evaluation
+## Weather Model Target and Evaluation
 
-$ RMSE = \sqrt{\frac{1}{nT}*\sum_{i,t}(\hat{y}_{i,t}-y_{i,t})^2} $
-
-### Batch Transform
-
-
-
-### ScriptProcessor for Evaluation
+There are multiple targets of interest, mainly the temperature and humidity of the environment. These targets, during the summer months especially, can have an impact on the electricity usage in an area. This project utilizes an deep learning time series algorithm called Deep AR, and on AWS this algorithm trains and predicts on all input features.
 
 The documentation on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
 
+$ RMSE = \sqrt{\frac{1}{nT}*\sum_{i,t}(\hat{y}_{i,t}-y_{i,t})^2} $
+
+## Electric Model Target and Evaluation
 
 
 ## Model Deploy
-
-https://github.com/caseywhorton/deep-ar-mlops-project-deploy
