@@ -46,23 +46,25 @@ _CURL requests_
 
 ## AWS S3
 
-- (top directory)
-    - observations
-        - <zone>_<date>.json
-- (second bucket))
-    - deep_ar
-        - data
-            - raw
-        - output
-            - model
-                - output
-                    - <model artifact>
-                    - predictions
-- (third bucket)
-    - deep_ar
-        - data
-            - train
-            - test
+```
+|-- first bucket
+|   |-- observations
+|   |   |-- <zone>_<date>.json
+|   |   |-- ...
+|-- second bucket
+|   |-- deep_ar
+|   |   |-- data
+|   |   |   |-- raw
+|   |   |   |   |-- ...
+|   |-- output
+|   |   |-- model artifacts
+|   |   |-- predictions
+|-- third bucket
+|   |-- deep_ar
+|   |   |-- data
+|   |   |   |-- train
+|   |   |   |-- test
+```
 
 ## AWS SNS Subscriptions
 
@@ -116,6 +118,38 @@ For CI/CD, I utilize a **Model Training Pipeline** and a **Model Deployment Pipe
 
 Model Training Pipeline: https://github.com/caseywhorton/deep-ar-mlops-project
 
+## Model Development Cycle
+
+Experimentation by a data scientist can fit into this pattern. AWS Sagemaker has a suite of tools that assists in experimentation. Within Sagemaker Studio, there are convenient ways to organize machine learning experimentation. Although not in a directory structure, I like to think of the parts of sagemaker studio like below:
+
+```
+|   |-- Projects
+|   |   |-- Repositories
+|   |   |-- Experiments
+|   |   |   |-- Pipelines
+|   |   |   |   |-- Run Groups
+|   |   |-- Model Groups
+|   |   |   |-- Run Groups
+|   |   |   |-- Model Registry
+```
+
+**Experiment Runs**
+
+<p align="center">
+  <img src="images/experiment_example.png" width="450" height="200">
+</p>
+
+For experiment runs, filtering on the `SageMakerTrainingJob` shows model metrics such as the `test:RMSE` for ranking models. Hyperparameters are also displayed.  Adding a feature set would be a helpful set of information for each experimental run. Using the **Run Group**, we have to manually promote the best model to deployment within the **Model Group**.
+
+**Pipeline Runs**
+
+The sequential steps in the machine learning pipeline are executed by a Sagemaker pipeline.
+
+For the model training and registration pipeline, we execute these steps:
+
+<p align="center">
+  <img src="images/pipeline_example.png" width="300" height="400">
+</p>
 
 # Machine Learning
 
