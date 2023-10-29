@@ -11,10 +11,10 @@ Every year, the months of summer demand an increase in electrical consumption to
 
 This document is broken into sections with subsections:
 + [Data Sources](#data-sources)
-+ ETL (Extract, Transform & Load)
-+ AWS Services and Tools
-+ AWS CodeBuild CI/CD
-+ Machine Learning
++ [ETL (Extract, Transform & Load)](#etl)
++ [AWS Services and Tools](#aws-services-and-tools)
++ [AWS CodeBuild CI/CD](#aws-codebuild-ci/cd)
++ [Machine Learning](#machine-learning)
 
 # Data Sources
 
