@@ -7,7 +7,7 @@
 Photo by <a href="https://unsplash.com/@densaldanha?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Denver Saldanha</a> on <a href="https://unsplash.com/photos/a-grassy-hill-with-power-lines-in-the-distance-75jQCOTi_EQ?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 </p>
 
-Greetings!
+Every year, the months of summer demand an increase in electrical consumption to cool our houses. This project aims to explore the relationship between electrical demand and weather and one day answer questions about the capacity and pricing of electricity in our changing world.  This is also an opportunity to gain hands-on experience with continuous development, machine learning operations, and longitudinal work and planning.  The majority of the work is completed on Amazon Web Services (AWS), which gives me an opportunity to learn more about the platform.
 
 
 # Data Sources
