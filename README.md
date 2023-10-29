@@ -9,6 +9,12 @@ Photo by <a href="https://unsplash.com/@densaldanha?utm_content=creditCopyText&u
 
 Every year, the months of summer demand an increase in electrical consumption to cool our houses. This project aims to explore the relationship between electrical demand and weather and one day answer questions about the capacity and pricing of electricity in our changing world.  This is also an opportunity to gain hands-on experience with continuous development, machine learning operations, and longitudinal work and planning.  The majority of the work is completed on Amazon Web Services (AWS), which gives me an opportunity to learn more about the platform.
 
+This document is broken into sections with subsections:
++ [Data Sources](#-data-sources)
++ ETL (Extract, Transform & Load)
++ AWS Services and Tools
++ AWS CodeBuild CI/CD
++ Machine Learning
 
 # Data Sources
 
