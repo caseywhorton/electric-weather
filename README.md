@@ -174,13 +174,23 @@ There are multiple targets of interest, mainly the temperature and humidity of t
 The documentation on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
 
 <p align="center">
-  <img src="images/rmse.png" width="450" height="200">
+  <img src="images/rmse_image.png" width="450" height="200">
 </p>
 <p align = "center">
-Photo by <a href="https://unsplash.com/@densaldanha?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Denver Saldanha</a> on <a href="https://unsplash.com/photos/a-grassy-hill-with-power-lines-in-the-distance-75jQCOTi_EQ?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 </p>
 
 ## Electric Model Target and Evaluation
 
 
-## Model Deploy
+# Model Deploy
+After successful training and evaluation, deploying the model becomes crucial. [Here is a link to the deployment repository](https://github.com/caseywhorton/deep-ar-mlops-project-deploy).  Here's an overview of the deployment process:
+
+## Model Packaging
+The trained models are serialized and packaged into a format suitable for deployment. In this process, the model artifacts, configurations, and dependencies are bundled together for seamless deployment.
+
+## Deployment Strategy
+AWS Lambda Deployment
+The model can be integrated into an AWS Lambda function for real-time predictions. This allows for on-demand inference and immediate responses to queries.
+
+Documentation and Model Versioning
+Maintaining comprehensive documentation detailing the deployed model's functionalities, versions, and endpoints is critical for cross-team collaboration and future enhancements.
