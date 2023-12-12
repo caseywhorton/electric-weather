@@ -14,14 +14,14 @@ This project uses two repositories with hooks into AWS Sagemaker Pipelines, Mode
 + [deep-ar-mlops-project-deploy](https://github.com/caseywhorton/deep-ar-mlops-project-deploy): Defines the Model deployment process using AWS Serverless Application Model and AWS Lambda.  
 
 This README is broken into sections with subsections:
-+ [Data Sources](#data-sources)
-+ [ETL (Extract, Transform & Load)](#etl)
-+ [AWS Services and Tools](#aws-services-and-tools)
-+ [Model Train](#model-train)
-+ [Model Deploy](#model-deploy)
-+ [DevOps](#devops)
++ [Data Sources](#data-sources) 🪣
++ [ETL (Extract, Transform & Load)](#etl) 🏗️
++ [AWS Services and Tools](#aws-services-and-tools) 🧰
++ [Model Train](#model-train) ⚙️
++ [Model Deploy](#model-deploy) 🚀
++ [DevOps](#devops) 🪄
 
-# Data Sources 🪣
+# Data Sources
 
 + Weather Data
     + https://api.weather.gov
@@ -35,13 +35,15 @@ _CURL requests_
 - Current Measurements: https://api.weather.gov/zones/forecast/OHZ055/observations
 - Electricity Price: "https://api.eia.gov/v2/electricity/retail-sales/data?api_key=<api_key>&frequency=monthly&data[0]=customers&data[1]=price&data[2]=revenue&data[3]=sales&facets[stateid][]=OH&start=2023-01&end=2023-05&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000"
 
-# ETL (Extract, Transform and Load) 🏗️
+# ETL
+
+Extract transform and load.
 
 1. Get data from API (source data), save to S3 (lambda)
 2. Preprocess files on S3 into raw data
 3. Preprocess raw data on S3 and split into train and test data
 
-# AWS Services and Tools 🧰
+# AWS Services and Tools
 
 + AWS S3: Storage for data.
 + AWS SNS: Subscription services
@@ -82,7 +84,7 @@ Sagemaker is used for model definition, training, versioning and monitoring. Wit
 + [Model Registry](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html)
 
 
-# Model Train ⚙️
+# Model Train
 
 ## DeepAR Algorithm
 The DeepAR algorithm, part of Amazon SageMaker suite, is a sophisticated forecasting model from AWS designed for time series predictions. It's tailor-made for both single and multiple types of time-based data. Given its proficiency in forecasting and managing various data streams, I think it's a perfect match for predicting temperature and similar features.
@@ -110,7 +112,7 @@ The documentation on the DeepAR input/output reveals the metric used to evaluate
 <p align = "center">
 </p>
 
-# Model Deploy 🚀
+# Model Deploy
 After successful training and evaluation, deploying the model becomes crucial. [Here is a link to the deployment repository](https://github.com/caseywhorton/deep-ar-mlops-project-deploy).  Here's an overview of the deployment process:
 
 ## Model Packaging
@@ -122,7 +124,7 @@ This model can be deployed on Sagemaker and made available for batch transform j
 ## Documentation and Model Versioning
 In addition to maintaining comprehensive documentation that outlines the functionalities and endpoints of deployed models, managing SageMaker Model Package Groups and Versions is crucial. Model Package Groups are a way to organize and group models, facilitating easier management, monitoring, and versioning. These groups allow for logical organization and tracking of different versions of a model, making it simpler to compare performance and manage updates over time. By leveraging SageMaker's model packaging capabilities, teams can efficiently version their models, ensuring transparent tracking, easier collaboration, and informed decision-making for future enhancements.
 
-# DevOps 🪄
+# DevOps
 
 For CI/CD, I utilize a **Model Training Pipeline** and a **Model Deployment Pipeline**
 
