@@ -6,94 +6,115 @@ from utils.preprocessing import *
 import datetime
 from io import StringIO  # python3; python2: BytesIO
 import io
+from datetime import datetime, timezone, timedelta, date
+import os
 
 print("Loading function")
 
-s3 = boto3.client("s3")
-
-
 def lambda_handler(event, context):
-    # Get the object from the event and show its content type
-    bucket = event["Records"][0]["s3"]["bucket"]["name"]
-    key = urllib.parse.unquote_plus(
-        event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
-    )
-    print("bucket, ", bucket)
-    print("key, ", key)
-    features = ["properties.temperature.value", "properties.relativeHumidity.value"]
-
     try:
+        # Initialize AWS clients
+        client = boto3.client("sagemaker")
         s3 = boto3.client("s3")
 
+        # Get model name from environment variable
+        model_name = os.environ.get("MODEL_NAME")
+        print("Model name : {}".format(model_name))
+
+        # Define S3 bucket and prefix
         bucket = "cw-sagemaker-domain-1"
         prefix = "deep_ar/data/raw"
 
+        # Get current and lagged timestamps
         today = datetime.now(timezone.utc)
         lag_365 = datetime.now(timezone.utc) + timedelta(days=-365)
 
-        objects = s3.list_objects(Bucket=bucket, Prefix=prefix)
+        # List objects in the S3 bucket
+        objects = s3.list_objects(Bucket=bucket, Prefix=prefix)["Contents"]
 
+        # Read data files modified within the last year
         df_list = []
-        for o in objects["Contents"]:
-            if o["LastModified"] <= today and o["LastModified"] >= lag_365:
-                print(o["Key"])
+        for o in objects:
+            if lag_365 <= o["LastModified"] <= today:
                 obj = s3.get_object(Bucket=bucket, Key=o["Key"])
                 df_list.append(pd.read_csv(obj["Body"]))
 
-        # drop the duplicates from the dataframe
+        # Concatenate dataframes, drop duplicates, and reset index
         preprocessed_df = pd.concat(df_list).drop_duplicates().reset_index()
 
-        # process the features in the columns of the dataframe
+        # Get start timestamp and its string representation
         start = getStart(preprocessed_df)
         start_str = getStartString(preprocessed_df)
+
+        # Define features and preprocess them
         features = ["properties.relativeHumidity.value", "properties.temperature.value"]
-
-        # preprocess the feature data
-        mylist = list()
-
+        mylist = []
         for feature in features:
             mylist.append(
                 featureDict(
                     start_str,
                     columnNameReformat(feature, "properties.relativeHumidity.value"),
-                    # feature,
                     preprocessQuant(preprocessed_df[feature]),
                 )
             )
 
-        # create the individual time series for each feature
-        time_series = []
-        for i in mylist:
-            time_series.append(dict_to_series(i))
+        # Convert feature dictionaries to time series
+        time_series = [dict_to_series(i) for i in mylist]
 
+        # Write time series data to a JSON lines file
         encoding = "utf-8"
         file_name = "serving.json"
-        i = 0
         with open("/tmp/" + file_name, "wb") as f:
-            for ts in time_series:
+            for i, ts in enumerate(time_series):
                 f.write(
                     series_to_jsonline(
                         ts, feature_name=list(mylist[i].keys())[1]
                     ).encode(encoding)
                 )
                 f.write("\n".encode(encoding))
-                i += 1
 
+        # Copy the JSON lines file to S3
         copy_to_s3(
             "/tmp/" + file_name,
-            "s3://cw-weather-data-deployment/serving/" + "serving.json",
+            "s3://cw-weather-data-deployment/serving/" + file_name,
             override=True,
         )
 
-        client = boto3.client("sagemaker")
+        # Create a timestamp for the transform job
+        timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
+        # Create the TransformJobName with a timestamp
+        transform_job_name = f"WeatherBatchTransform-{timestamp}"
+
+        # Create a dictionary containing start and start_str values
+        metadata_dict = {
+            "start": start.strftime("%Y-%m-%d %H:%M:%S"),
+            "start_str": start_str
+        }
+
+        # Convert dictionary to JSON format
+        metadata_json = json.dumps(metadata_dict)
+
+        # Write metadata JSON to a file
+        metadata_file_name = "metadata.json"
+        with open("/tmp/" + metadata_file_name, "w") as f:
+            f.write(metadata_json)
+
+        # Copy the metadata file to S3
+        copy_to_s3(
+            "/tmp/" + metadata_file_name,
+            "s3://cw-weather-data-deployment/metadata/" + metadata_file_name,
+            override=True,
+        )
+
+        # Create a SageMaker transform job
         response = client.create_transform_job(
-            TransformJobName="weather-forecast-model-transform",
-            ModelName="pipelines-j2qojlehpzpz-weather-forecast-mod-fzXXv3RR41",
+            TransformJobName=transform_job_name,
+            ModelName=model_name,
             MaxConcurrentTransforms=1,
             ModelClientConfig={
                 "InvocationsTimeoutInSeconds": 600,
-                "InvocationsMaxRetries": 5,
+                "InvocationsMaxRetries": 3,
             },
             MaxPayloadInMB=30,
             BatchStrategy="SingleRecord",
@@ -114,19 +135,13 @@ def lambda_handler(event, context):
                 "AssembleWith": "Line",
             },
             TransformResources={
-                "InstanceType": "ml.m4.xlarge",
+                "InstanceType": "ml.m5.xlarge",
                 "InstanceCount": 1,
             },
-            ExperimentConfig={"ExperimentName": "weather-forecast-model"},
         )
 
     except Exception as e:
         print(e)
-        print(
-            "Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.".format(
-                key, bucket
-            )
-        )
         raise e
 
-    return None  # ['ContentType']
+    return {"statusCode": 200, "body": "Lambda execution completed"}
