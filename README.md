@@ -127,7 +127,7 @@ In addition to maintaining comprehensive documentation that outlines the functio
 # DevOps
 
 <p align="center">
-  <img src="images/ModelBuildDeployCICD.png" width="450" height="100">
+  <img src="images/ModelBuildDeployCICD.png" width="600" height="600">
 </p>
 <p align = "center">
 </p>
