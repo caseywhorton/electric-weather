@@ -126,7 +126,15 @@ In addition to maintaining comprehensive documentation that outlines the functio
 
 # DevOps
 
+<p align="center">
+  <img src="images/ModelBuildDeployCICD.png" width="450" height="100">
+</p>
+<p align = "center">
+</p>
+
 For CI/CD, I utilize a **Model Training Pipeline** and a **Model Deployment Pipeline**
+
+
 
 ## Model Development Cycle
 
