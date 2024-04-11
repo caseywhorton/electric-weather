@@ -35,6 +35,46 @@ _CURL requests_
 - Current Measurements: https://api.weather.gov/zones/forecast/OHZ055/observations
 - Electricity Price: "https://api.eia.gov/v2/electricity/retail-sales/data?api_key=<api_key>&frequency=monthly&data[0]=customers&data[1]=price&data[2]=revenue&data[3]=sales&facets[stateid][]=OH&start=2023-01&end=2023-05&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000"
 
+# Analysis
+
+** Electricity Demand
+
+Demand is measured in megawatthours, and to correlate with the weather in Ohio, we are using the PJM data.
+
+<p align="center">
+  <img src="images/electricity_graph.png" width="450" height="300">
+</p>
+
+** Temperature
+
+Demand is measured in degrees Celsius from the weather station in Columbus, Ohio.
+
+<p align="center">
+  <img src="images/temperature_graph.png" width="450" height="300">
+</p>
+
+** Correlating Temperature and Electricity Deamnd
+
+In the month of August, we can see the correlation is strong.
+
+<p align="center">
+  <img src="images/correlation_1.png" width="450" height="300">
+</p>
+
+In the fall and winter, we can see the correlation is not as strong and the relationship is a little more complicated.
+
+<p align="center">
+  <img src="images/correlation_2.png" width="450" height="300">
+</p>
+
+Over time, we can look at the correlation between electricity and demand over rolling 48-hour periods.
+
+<p align="center">
+  <img src="images/correlation_over_time.png" width="450" height="300">
+</p>
+
+
+
 # ETL
 
 Extract transform and load.
@@ -82,7 +122,6 @@ Sagemaker is used for model definition, training, versioning and monitoring. Wit
 + [Sagemaker Pipelines](https://docs.aws.amazon.com/sagemaker/latest/dg/pipelines-sdk.html)
 + [Sagemaker Studio](https://aws.amazon.com/sagemaker/studio/)
 + [Model Registry](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html)
-
 
 # Model Train
 
@@ -157,3 +196,4 @@ For the model training and registration pipeline, we execute these steps:
 <p align="center">
   <img src="images/pipeline_example.png" width="300" height="400">
 </p>
+
