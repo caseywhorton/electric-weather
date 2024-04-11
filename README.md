@@ -37,7 +37,7 @@ _CURL requests_
 
 # Analysis
 
-** Electricity Demand
+**Electricity Demand**
 
 Demand is measured in megawatthours, and to correlate with the weather in Ohio, we are using the PJM data.
 
@@ -45,7 +45,7 @@ Demand is measured in megawatthours, and to correlate with the weather in Ohio, 
   <img src="images/electricity_graph.png" width="450" height="300">
 </p>
 
-** Temperature
+**Temperature**
 
 Demand is measured in degrees Celsius from the weather station in Columbus, Ohio.
 
@@ -53,7 +53,7 @@ Demand is measured in degrees Celsius from the weather station in Columbus, Ohio
   <img src="images/temperature_graph.png" width="450" height="300">
 </p>
 
-** Correlating Temperature and Electricity Deamnd
+**Correlating Temperature and Electricity Demand**
 
 In the month of August, we can see the correlation is strong.
 
