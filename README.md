@@ -7,14 +7,15 @@
 Photo by <a href="https://unsplash.com/@densaldanha?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Denver Saldanha</a> on <a href="https://unsplash.com/photos/a-grassy-hill-with-power-lines-in-the-distance-75jQCOTi_EQ?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 </p>
 
-Every year, the months of summer demand an increase in electrical consumption to cool our houses. This project aims to explore the relationship between electrical demand and weather and one day answer questions about the capacity and pricing of electricity in our changing world.  This is also an opportunity to gain hands-on experience with continuous development, machine learning operations, and longitudinal work and planning.  The majority of the work is completed on Amazon Web Services (AWS), which gives me an opportunity to learn more about the platform.
+Every year, the months of summer demand an increase in electrical consumption to cool our houses. This project aims to explore the relationship between electrical demand and weather and one day answer questions about the capacity and pricing of electricity in our changing world.  This project is aimed at providing a longitudinal view of this problema and use best practices in continuous integration and deployment, machine learning, and utilization of cloud resources.
 
-This project uses two repositories with hooks into AWS Sagemaker Pipelines, Model Registry, CodeBuild and CodePipeline:
+This project uses two repositories with hooks into AWS services:
 + [deep-ar-mlops-project](https://github.com/caseywhorton/deep-ar-mlops-project): Defines the Model training and registration pipeline.  
 + [deep-ar-mlops-project-deploy](https://github.com/caseywhorton/deep-ar-mlops-project-deploy): Defines the Model deployment process using AWS Serverless Application Model and AWS Lambda.  
 
 This README is broken into sections with subsections:
 + [Data Sources](#data-sources) 🪣
++ [Analysis](#analysis)
 + [ETL (Extract, Transform & Load)](#etl) 🏗️
 + [AWS Services and Tools](#aws-services-and-tools) 🧰
 + [Model Train](#model-train) ⚙️
@@ -28,14 +29,11 @@ This README is broken into sections with subsections:
     + https://www.weather.gov/documentation/services-web-api
 + Electricity
     + https://www.eia.gov/opendata/browser/electricity
-    + ...
 
-_CURL requests_
-- Forecast: https://api.weather.gov/zones/Feature/OHZ055/forecast
-- Current Measurements: https://api.weather.gov/zones/forecast/OHZ055/observations
-- Electricity Price: "https://api.eia.gov/v2/electricity/retail-sales/data?api_key=<api_key>&frequency=monthly&data[0]=customers&data[1]=price&data[2]=revenue&data[3]=sales&facets[stateid][]=OH&start=2023-01&end=2023-05&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000"
 
 # Analysis
+
+A relationship between the temperature outside and the demand for electricity to cool a house using air conditioning (AC) sounds very plausible. Since we are relying on past data to train a forecasting model, establishing a sense of correlation between these variables seems like a logical first step.
 
 **Electricity Demand**
 
@@ -74,16 +72,15 @@ Over time, we can look at the correlation between electricity and demand over ro
 </p>
 
 
+# Extract Transform and Load (ETL)
 
-# ETL
+The ETL process for this project unfolds across several AWS services. We source data from two publicly available sites, using API requests to gather the raw data and save in Amazon S3. From there, a series of Lambda functions process the data into the format needed for further analysis or model training. See the diagram below for more details:
 
-Extract transform and load.
+TO DO: clip and share an image of the ETL process.
 
-1. Get data from API (source data), save to S3 (lambda)
-2. Preprocess files on S3 into raw data
-3. Preprocess raw data on S3 and split into train and test data
+# AWS Services
 
-# AWS Services and Tools
+This is a description of the AWS services used in the project. 
 
 + AWS S3: Storage for data.
 + AWS SNS: Subscription services
@@ -101,7 +98,6 @@ Extract transform and load.
 
 This project uses several lambda functions for serverless computation in the data pipeline.  These functions run on either a trigger or schedule written and saved in AWS EventBridge.
 
-
 **get_weather_data** : Gets the data from the API request. Runs on a schedule.  
 **preprocess_weather_data** : Preprocessing the API request JSON data into just feature data.  
 **train_test_split_weather_data** : Gathers preprocessed data and creates a training and test dataset.  
@@ -111,7 +107,7 @@ _Note: Each observation is roughtly 1 hour, so we keep 24 observations as a hold
 
 ## AWS Elastic Container Registry (ECR)
 
-**Docker**
+For processing steps in the AWS Sagemaker pipeline, we can use a custom Docker container fit for the purpose. The container is saved to the Container Registry to give it an Amazon Resource Number (ARN) and make it accessible by other services on the platform.
 
 `~ % docker build -t <> -f ./ml_preprocessing_dockerfile . --platform=linux/amd64`
 
@@ -123,7 +119,7 @@ Sagemaker is used for model definition, training, versioning and monitoring. Wit
 + [Sagemaker Studio](https://aws.amazon.com/sagemaker/studio/)
 + [Model Registry](https://docs.aws.amazon.com/sagemaker/latest/dg/model-registry.html)
 
-# Model Train
+# Model Training
 
 ## DeepAR Algorithm
 The DeepAR algorithm, part of Amazon SageMaker suite, is a sophisticated forecasting model from AWS designed for time series predictions. It's tailor-made for both single and multiple types of time-based data. Given its proficiency in forecasting and managing various data streams, I think it's a perfect match for predicting temperature and similar features.
@@ -139,9 +135,9 @@ JSON Document Format for Deep AR:
 
 In order to train the deep AR model, we need at least 300 observations. A single day of observations from a single station has about 72 observations. So, we need several days of observations.
 
-## Weather Model Target and Evaluation
+## Model Target and Evaluation
 
-There are multiple targets of interest, mainly the temperature and humidity of the environment. These targets, during the summer months especially, can have an impact on the electricity usage in an area. This project utilizes an deep learning time series algorithm called Deep AR, and on AWS this algorithm trains and predicts on all input features.
+There are multiple targets of interest, mainly the temperature and humidity of the environment and the consumption of electricity. This project utilizes an deep learning time series algorithm called Deep AR, and on AWS this algorithm trains and predicts on all input features.
 
 The documentation on the DeepAR input/output reveals the metric used to evaluate the model during training. The root mean squared error (RMSE) is calculated over all of the series that are being evaluated, and the formula is a little different than the usual RMSE calculated over a single set of predictions:
 
@@ -151,29 +147,7 @@ The documentation on the DeepAR input/output reveals the metric used to evaluate
 <p align = "center">
 </p>
 
-# Model Deploy
-After successful training and evaluation, deploying the model becomes crucial. [Here is a link to the deployment repository](https://github.com/caseywhorton/deep-ar-mlops-project-deploy).  Here's an overview of the deployment process:
-
-## Model Packaging
-The trained models are serialized and packaged into a format suitable for deployment. In this process, the model artifacts, configurations, and dependencies are bundled together for seamless deployment.
-
-## Deployment Strategy
-This model can be deployed on Sagemaker and made available for batch transform jobs. This isn't a real-time inference model yet, so it is unecessary to have an endpoint configured or live. Instead, a lambda function is updated with the name of the most recently deployed model. During inference, the lambda function with run the batch transform job configured with a destination in Amazon S3 for model predictions.
-
-## Documentation and Model Versioning
-In addition to maintaining comprehensive documentation that outlines the functionalities and endpoints of deployed models, managing SageMaker Model Package Groups and Versions is crucial. Model Package Groups are a way to organize and group models, facilitating easier management, monitoring, and versioning. These groups allow for logical organization and tracking of different versions of a model, making it simpler to compare performance and manage updates over time. By leveraging SageMaker's model packaging capabilities, teams can efficiently version their models, ensuring transparent tracking, easier collaboration, and informed decision-making for future enhancements.
-
-# DevOps
-
-<p align="center">
-  <img src="images/ModelBuildDeployCICD.png" width="600" height="600">
-</p>
-<p align = "center">
-</p>
-
-For CI/CD, I utilize a **Model Training Pipeline** and a **Model Deployment Pipeline**
-
-
+Model performance, in this case, is judged over several targets.  There are other options for predicting on a single target, however these options are not used here.
 
 ## Model Development Cycle
 
@@ -197,3 +171,12 @@ For the model training and registration pipeline, we execute these steps:
   <img src="images/pipeline_example.png" width="300" height="400">
 </p>
 
+# Model Deployment
+
+Deployment is handled automatically as part of the continuous delivery pipeline. Changes to the main branch will start the deployment process. A final check of the Lambda function is made before allowing the function and newest model to take any data and make new predictions. [Here is a link to the deployment repository](https://github.com/caseywhorton/deep-ar-mlops-project-deploy).  
+
+The trained models are serialized and packaged into a format suitable for deployment. In this process, the model artifacts, configurations, and dependencies are bundled together for seamless deployment. After training, a model is registered into the Sagemaker model registry, and requires a user to review and approve that version for productions. From there, a lambda function is automatically updated with the name of the most recently deployed model. 
+
+During inference, the lambda function with run the batch transform job configured with a destination in Amazon S3 for model predictions.
+
+In addition to maintaining comprehensive documentation that outlines the functionalities and endpoints of deployed models, managing SageMaker Model Package Groups and Versions is crucial. Model Package Groups are a way to organize and group models, facilitating easier management, monitoring, and versioning. These groups allow for logical organization and tracking of different versions of a model, making it simpler to compare performance and manage updates over time. By leveraging SageMaker's model packaging capabilities, teams can efficiently version their models, ensuring transparent tracking, easier collaboration, and informed decision-making for future enhancements.
